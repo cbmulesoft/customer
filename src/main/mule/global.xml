@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<apikit:config name="100m-customer-config" api="100m-customer.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<file:config name="File_Config" doc:name="Domain File Config" doc:id="8783194e-748a-47d2-9ae7-7dffd50bd915" >
+		<file:connection workingDir="${file.workingDir}" />
+	</file:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="205b164f-8037-4670-b83c-6a95b7d62887" file="common.properties" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="d7b608dd-2ef5-4df3-a741-cd44d698b89e" file="secure.properties" key="mulesoft" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<import doc:name="Import" doc:id="7f58dc9b-d104-452e-b26f-8f1210d49586" file="error-handler.xml" />
+	<import doc:name="Import" doc:id="8b158f42-146f-4256-ae58-9386f0350e28" file="mule-100m-logutils.xml" />
+		<os:object-store name="Object_store" doc:name="Object store" doc:id="e5a2d521-71b5-4720-b52c-92614736f2e2" maxEntries="100" entryTtl="10000" expirationInterval="100" config-ref="ObjectStore_Config" />
+	<os:config name="ObjectStore_Config" doc:name="ObjectStore Config" doc:id="6cf0f179-6161-4138-94c7-2cbbbd23f0a5" >
+		<os:connection >
+			<reconnection >
+				<reconnect />
+			</reconnection>
+		</os:connection>
+	</os:config>
+	<http:listener-config name="HTTP_Listener_config_Local" doc:name="HTTP Listener config" doc:id="d5f10085-05ae-443c-8e78-642ced103cdd">
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="c1122fc8-e703-4da4-9722-844ee46555b6" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.password}" database="${db.database.name}" />
+	</db:config>
+
+</mule>

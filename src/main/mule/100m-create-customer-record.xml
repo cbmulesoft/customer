@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<flow name="100m-create-customer-recordFlow" doc:id="188f711a-3d13-411c-8f01-8ba636f6c77a">
+		<set-variable value="100m-create-customer-recordFlow" doc:name="Set flowName" doc:id="fe132b34-af06-4518-b26d-05923a9d501b" variableName="flowName"/>
+		<flow-ref doc:name="log-request-subFlow" doc:id="436c4eaf-bc06-4f38-8acf-c1458cd9a474" name="log-request-subFlow"/>
+		<ee:transform doc:name="Transform Message" doc:id="a639eaf3-38d7-4b40-b5ee-a1da4791a5d9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import dwls::commonFunctions
+output application/json
+---
+{
+	customerName: payload.contactFirstName ++ " " ++ payload.contactLastName,
+	contactLastName: payload.contactLastName,
+	contactFirstName: payload.contactFirstName,
+	phone: payload.phone,
+	addressLine1:payload.addressLine1,
+	addressLine2:payload.addressLine2,
+	city:payload.city,
+	state:payload.state,
+	postalCode:payload.postalCode,
+	country:payload.country,
+	creditLimit:commonFunctions::generateDecimalPlaces(payload.creditLimit)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="d3a5f726-f96c-42b4-91c5-4c14754d8251" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert  into customers(customerName,contactLastName,contactFirstName,phone,addressLine1,addressLine2,city,state,postalCode,country,creditLimit) values 
+(:customerName,:contactLastName,:contactFirstName,:phone,:addressLine1,:addressLine2,:city,:state,:postalCode,:country,:creditLimit)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[payload]]]></db:input-parameters>
+		</db:insert>
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	message: "Record Created Successfully"&#10;}]' doc:name="Set Payload" doc:id="9cd7f5b1-db5b-4819-ae47-31e1a041dee3" />
+		<flow-ref doc:name="log-response-subFlow" doc:id="a6962b5a-ab54-45d4-96ee-f3e302e5a17f" name="log-response-subFlow"/>
+		<error-handler ref="100m-customer-appError_Handler" />
+	</flow>
+</mule>

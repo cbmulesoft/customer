@@ -1,0 +1,45 @@
+#%RAML 1.0
+title: 100m-customer.raml
+version: v1
+baseUri: https://localhost:443/customers/v1
+description: This api will be used for performing operations on customers data
+
+mediaType:
+  application/json
+
+/customers:
+  post:
+    description: Create Customers
+    body:
+      application/json:
+        example:
+          !include example.raml
+    responses:
+      200:
+        body:
+          application/json:
+      400:
+        body:
+          application/json:
+      404:
+        body:
+          application/json:
+               
+  /{customerID}:
+    uriParameters:
+      customerID:
+        displayName: customer ID
+        type: number        
+    get:
+      queryParameters:
+        locale:
+          description: "Lcoale to display credit limit currency format"
+          required: false
+          minLength: 3
+          type: string
+      responses:
+        200:
+          body:
+            application/json:
+              example:
+                !include example.raml

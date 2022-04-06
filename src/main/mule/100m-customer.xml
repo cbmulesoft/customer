@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+   <flow name="100m-customer-main">
+        <http:listener config-ref="HTTP_Listener_config_Local" path="${base.path}/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="100m-customer-config" />
+		<error-handler ref="100m-customer-appError_Handler" />
+    </flow>
+	<flow name="get:\customers\(customerID):100m-customer-config">
+		<flow-ref doc:name="Flow 100m-get-customer-data:customerIDFlow" doc:id="2cf6acc8-d1f8-411a-8719-a5411eaa83e1" name="100m-get-customer-data:customerIDFlow"/>
+		<error-handler ref="100m-customer-appError_Handler" />
+    </flow>
+    <flow name="post:\customers:application\json:100m-customer-config">
+        <flow-ref doc:name="Flow 100m-create-customer-recordFlow" doc:id="ad839dfb-76c6-42fc-9b2c-6de34defa23b" name="100m-create-customer-recordFlow"/>
+		<error-handler ref="100m-customer-appError_Handler" />
+    </flow>
+</mule>
